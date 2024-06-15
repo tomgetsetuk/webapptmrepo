@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Drag and Drop Quiz</title>
+  <style>
+    .dropzone {
+      width: 300px;
+      height: 200px;
+      border: 2px dashed #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 10px;
+    }
+    .draggable {
+      width: 100px;
+      height: 50px;
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      line-height: 50px;
+      margin: 10px;
+      cursor: move;
+    }
+  </style>
+</head>
+<body>
+  <h2>Drag-and-Drop Quiz</h2>
+  <form id="quizForm">
+    <div class="dropzone" id="dropzone1">Drop here</div>
+    <div class="draggable" draggable="true" id="drag1">Item 1</div>
+    <div class="dropzone" id="dropzone2">Drop here</div>
+    <button type="submit">Submit</button>
+  </form>
+  
+  <script>
+    const dragItem = document.querySelector('.draggable');
+    const dropzones = document.querySelectorAll('.dropzone');
+    let score = 0;
+
+    dragItem.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text', e.target.id);
+    });
+
+    dropzones.forEach(zone => {
+      zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+      });
+
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const data = e.dataTransfer.getData('text');
+        const draggedElement = document.getElementById(data);
+        zone.appendChild(draggedElement);
+        if (zone.id === 'dropzone1' && data === 'drag1') {
+          score = 1;
+        } else {
+          score = 0;
+        }
+      });
+    });
+
+    document.getElementById('quizForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      fetch('https://script.google.com/macros/s/AKfycbz1iIcmQ3Tgqn-qFuYKzZkbQv0Lfr1nXzQbeDc2V1LQvWzDQ4Egk9uWF5kldcIbzikgWA/exec', {
+        method: 'POST',
+        body: new URLSearchParams('score=' + score),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+      .then(response => response.text())
+      .then(result => {
+        alert('Score submitted successfully: ' + result);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+  </script>
+</body>
+</html>
